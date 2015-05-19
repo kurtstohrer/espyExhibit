@@ -98,7 +98,10 @@ app.main = {
     shuffedArray:undefined,
     prefsCollier:undefined,
     drawDir:undefined,
-
+    seld:undefined,
+    topText:undefined,
+    curretTagType:undefined,
+    justPressed:undefined,
 
     init: function () {
 
@@ -110,112 +113,30 @@ app.main = {
         t.HEIGHT = 1080;
         t.canvas.width = t.WIDTH;
         t.canvas.height = t.HEIGHT;
+
+        loadAssets();
         t.exState = "tabs";
-       
+        
         this.tapTimer = 30;
         this.taps = [{ x: 0, y: 0, }, { x: 100, y: 100, }];
        
         this.matrix = [1, 0, 0, 1, 0, 0];
-        this.loadImages();
+     
+        t.justPressed = false;
         
-        t.phoneCol = {
-            w:219,
-            h:314,
-            x:t.WIDTH - 70 - 219,
-            y:t.HEIGHT - 35 - 314,
-        };
-         t.prefsCollier = {
-            w:440,
-            h:314,
-            x:t.WIDTH - 70 - 400,
-            y:t.HEIGHT - 35 - 314 ,
-        };
-        t.exCol = {
-            w:365,
-            h:550,
-            x:70,
-            y:t.HEIGHT - 550,
 
-        }
-        t.dePerfCol ={
-            w:t.WIDTH/3,
-            h: t.HEIGHT -850,
-            x: (t.WIDTH/2) - ((t.WIDTH/3)/2),
-            y: 850,
-        }
-        t.backBtn = {
-            x:70,
-            y:t.exCol.y -40,
-            w:32,
-            h:32,
-        }
-        //console.log(t.phoneCol);
-        //TODO: set this to the user that is currently at the Exhibit
-        t.user = {
-            interest:[],
-        }
 
-        t.prefs = t.user.interest;
+        t.prefs = [];
         t.canScroll = false;
-        t.activeUser = true;
-        
+        t.activeUser = false;
+        t.seld = false;
        t.drawDir = false;
-
-        t.exhibits = [{
-            name:'Teting123',
-            tags:['Art','Gaming','Science'],
-            x: 0,
-            y: 0,
-            zone: "Global Village",
-            location: "SUS-12",
-            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum malesuada varius erat, sit amet ornare nunc. Quisque condimentum dapibus elementum. Suspendisse ut mollis erat. Nunc eu leo augue. Ut tempor, mi sit amet viverra pulvinar, eros est porttitor nulla, non venenatis odio turpis vel nisl. Nullam laoreet tellus finibus, facilisis tortor vel, scelerisque est. Nam sed augue quis lorem aliquet pellentesque vel eget nibh. Aliquam sed vulputate nunc. Curabitur nec ullamcorper justo. Aenean non est ac quam luctus fermentum eget ut ante.",
-            radius: 0,
-            time:'All Day',
-            ratings: [],
-            exhibitors: ['Kurt Stohrer','bobs Friend','Kurt Stohrer','bobs Friend','Kurt Stohrer','bobs Friend','Kurt Stohrer','bobs Friend'],
-            code: "1lkihgn77",
-            img: "irrelevnt",
-            ageGroup:'all',
-
-        },
-        {
-            name:'Espy',
-            tags:['Senior Projects','Communication','Design','Technology'],
-            x: 0,
-            y: 0,
-            zone: "Artistic Alley",
-            location: "BOOTH-A",
-            description: "Espy is a dynamic and interactive wayfinding experience for ImagineRIT. Through a mobile app that people download, Espy tracks the attendee's location in order to learn about their interests as they move around the festival and attend different events. The Espy mobile app then gives attendees recommendations for events to visit based on their interests. At our exhibit, attendees can further explore the festival through an interactive map display.",
-            radius: 0,
-            time:'All Day',
-            ratings: [],
-            exhibitors: ['Kat Pillman', 'Andrew Bernardo', 'Sarah Armstrong', 'Erving Romero', 'Kurt Stohrer', 'Melody Kelly', 'Jordan Detota', 'Brandon McAlees'],
-            code: "ES11PY",
-            img: "irrelevnt",
-            ageGroup:'all',
-
-        },
-         {
-            name:'Teting789',
-            tags:['Design','Software','Technology'],
-            x: 0,
-            y: 0,
-            zone: "Artistic Alley",
-            location: "gs-12",
-            description: "yet this is a another fucking test",
-            radius: 0,
-            time:'All Day',
-            ratings: [],
-            exhibitors: ['bob','bobs Friend', 'rick too'],
-            code: "1lalalala",
-            img: "irrelevnt",
-            ageGroup:'all',
-
-        } ];
+       t.exhibits = exDB;
+         //console.log(app.main.exhibits);
 
         for(var s = 0; s < t.exhibits.length; s++){
             var ex = t.exhibits[s];
-            var color = '#FFF';
+            var color = t.textCol.mid;
             var dist;
             switch(ex.zone) {
                 case 'Green Place':
@@ -258,7 +179,7 @@ app.main = {
                     color = "#ED9A37";
                     dist = 2;
                     break;
-                case 'RIT Center':
+                case 'RIT Central':
                     color = "#F4C031";
                      dist = 4;
                     break;
@@ -272,10 +193,24 @@ app.main = {
                     break;
             }
             t.exInfoImgs.push(new Image());
-            var imgpath = ex.tags[0].replace(/ /g, "-");
-                imgpath = imgpath.toLowerCase();
-                imgpath = imgpath +".png";
-
+            var imgpath;
+           
+            
+            if(ex.tags == undefined){
+                ex.tags = [];
+                 //imgpath = "multidisciplinary.png";
+               
+            }
+            else{
+                if(ex.tags != undefined){
+                    imgpath = ex.tags[0].replace(/ /g, "-");
+                    imgpath = imgpath.toLowerCase();
+                    imgpath = imgpath +".png";
+                }
+            }
+            if(imgpath == ".png"){
+                imgpath = "multidisciplinary.png";
+            }
             var size = 100;
            
             t.exInfo.push({
@@ -311,94 +246,6 @@ app.main = {
 
 
             });
-
-        }
-        //console.log(t.exInfo);
-
-        t.initZones();
-        this.initTags();
-        this.zoneBtns = [
-        {
-            name:'tags',
-            x:-100,
-            y:-100,
-            img:'tags',
-            offx: -10,
-            offy: -50,
-            selected:false,
-            draw:false,
-            popTimer: 5,
-            oPop: 5,
-            r:24,
-
-
-        },
-         {
-            name:'exhibits',
-            x:-100,
-            y:-100,
-            img:'exhibits',
-            offx: 50,
-            offy: -30,
-            selected:false,
-            draw:false,
-            popTimer: 10,
-            oPop: 15,
-            r:24,
-
-        },
-         {
-            name:'nav',
-            x:-100,
-            y:-100,
-            img:'nav',
-            offx: 50,
-            offy: 30,
-            selected:false,
-            draw:false,
-            popTimer: 15,
-            oPop: 25,
-            r:24,
-        },
-
-        ];
-        t.heatMapBtn = {
-            x:1740,
-            y:661,
-            r:24,
-            img:t.heatmapImg,
-            cx:1740,
-            cy:661,
-            selected: false,
-            name:'heatbutton',
-            txt:"Heat Map",
-
-        }
-         t.visitedBtn = {
-                x:undefined,
-                y:undefined,
-                r:24,
-                selected:false,
-                cx:undefined,
-                cy:undefined,
-                img:t.visitImg,
-                name:'visited',
-                txt:'Visited',
-                oi:t.visitImg,
-                
-            }
-        t.recoBtn = {
-                x:undefined,
-                y:undefined,
-                r:24,
-                selected:false,
-                cx:undefined,
-                cy:undefined,
-                img:t.recoImg,
-                name:'reco',
-                txt: 'Recommended',
-                oi:t.recoImg,
-                
             }
 
         t.pathImg = new Image();
@@ -412,33 +259,45 @@ app.main = {
             t.zbtnImgs.push(new Image());
         }
          t.toPref = false;
+
         this.resetTags();
         this.updateCenterTags();
         t.state = "default";
         //console.log(t.tagCols);
         t.shuffedArray = t.shuffleArray(t.exInfo);
        t.handleCurrentInfo();
+
+       t.topText = "Featured Exhibits";
         this.update();
          //TODO: set this to all of the last x's and y's of each user  do this everytime heatmap state is active
         t.allUserXYs = [];
+
        
-        for(var v = 0; v < 500; v ++){
-                var x = Math.floor(Math.random() * t.WIDTH) + 324;
-                var y = Math.floor(Math.random() * 700) + 284;
-                t.allUserXYs.push({x:x,y:y});
-        }
+      
         for(var f = 0; f < 700; f++){
-                var x = Math.floor(Math.random() * t.WIDTH) + t.WIDTH/2;
+                var x = Math.floor(Math.random() * t.WIDTH) + 324;
                 var y = Math.floor(Math.random() * 700) + 284;
                 t.pastUserXYs.push({x:x,y:y});
         }
         this.totalNumUsers = t.allUserXYs.length;
         t.recco();
-       // console.log(t.totalNumUsers);
-        console.log("main.js init");
+       
     },
-   
-    
+
+    noCollider: function (){
+      var t = this;
+      if(t.zoneBtns[0].selected == true){
+        for(var i = 0; i < t.zones.length; i++){
+            var zo = t.zones[i];
+            zo.r = 0;
+        }
+        var extras = [t.fhColEx,t.centralColEx,t.sciColEx,t.techColEx];
+        for(var h = 0 ; h < extras.length; h++){
+            var ex = extras[h];
+           ex.r = 0;
+        }
+      }
+    },
     
     getCorrectXY: function (v) {
         var n;
@@ -458,114 +317,180 @@ app.main = {
 
     draw: function () {
        var t = this;
+       var dl = app.drawLib;
        var w = t.WIDTH;
        var h = t.HEIGHT;
-       t.drawImage(t.mapImage,0,0,w,h);
-       t.drawImage(t.phoneZone,t.phoneCol.x,t.phoneCol.y,t.phoneCol.w,t.phoneCol.h);
-       //t.drawRect(t.dePerfCol.x,t.dePerfCol.y,t.dePerfCol.w,t.dePerfCol.h,"#000",1);
-
-       
-       if(t.exState == 'tabs'){
+       //draw background
+       dl.drawImage(t.ctx,t.mapImage,0,0,w,h);
+       //draw phone zone outline
+       dl.drawImage(t.ctx,t.phoneZone,t.phoneCol.x,t.phoneCol.y,t.phoneCol.w,t.phoneCol.h);
+      //draw current info in tabs view
+      if(t.exState == 'tabs'){
             for(var w = 0; w < t.currentInfos.length; w++){
                 t.drawExInfoBar(t.currentInfos[w],w);
             }
         }
-         
-        if(t.exState == 'PDP'){
-            
+      //draw current info in PDP mode
+      if(t.exState == 'PDP'){
             if(t.cINFO.length > 0){
-                
-
                 t.drawExbDetail(t.cINFO[0],0);
             }
         }
-       t.drawImage(t.hideImg,0,0,1920,1080);
+        //draw top hald of baground to hide the info scroll
+       dl.drawImage(t.ctx,t.hideImg,0,0,1920,1080);
+       //draw zones background layer
        for(var d= 0; d < t.bgZones.length; d++){
             this.drawZone(t.bgZones[d],d,t.bgZoneImgs);
        }
-
+       //draw zoones foreground(changing) layer
        for(var i = 0; i < t.zones.length; i++){
-            
             this.drawZone(t.zones[i],i,t.zoneImgs);
-            
-       }
-
-       if(t.activeUser == true){
+        }
+        // draw buttons for an active user
+        if(t.activeUser == true){
             var btns = [t.heatMapBtn,t.visitedBtn,t.recoBtn];
             for(var b = 0; b < btns.length; b++){
                 var but = btns[b];
                 t.drawBtn(but,but.r,but.img);
-                t.drawText(but.txt,but.x,but.y + (but.r + 25),15,t.textCol.mid,100);
-                
+                dl.drawText(t.ctx,but.txt,but.x,but.y + (but.r + 25),15,t.textCol.mid,100);
             }
        }
+       // if there is no active user draw heatmap button
        if(t.activeUser == false){
             t.drawBtn(t.heatMapBtn,t.heatMapBtn.r,t.heatMapBtn.img);
-            t.drawText(t.heatMapBtn.txt, t.heatMapBtn.x,t.heatMapBtn.y + (t.heatMapBtn.r + 25),15,t.textCol.mid,100);
+            dl.drawText(t.ctx,t.heatMapBtn.txt, t.heatMapBtn.x,t.heatMapBtn.y + (t.heatMapBtn.r + 25),15,t.textCol.mid,100);
        }
-       for(var k = 0; k < this.tagCols.length; k++){
-                          var ta = this.tagCols[k];
-                            this.drawTag(ta,k);
-
+       //draw zone buttons and paths
+       if(t.state == "default"){
+            if(t.zoneBtns[2].selected == true){
+                var cur = t.getSelectedZone();
+                if(cur.img != 'booth'){
+                    t.pathImg.src = 'img/paths/' + cur.img +'.png';
+                    dl.drawImage(t.ctx,t.pathImg,0,0,t.WIDTH,t.HEIGHT);
+                }
+            }
+            for(var z = 0; z < t.zoneBtns.length; z++){
+                var zb = t.zoneBtns[z];
+                if(zb.popTimer <= 0){
+                    t.drawZoneBtn(zb,24,z);
+                }
+            }
         }
-        for(var m = 0; m < t.exCols.length; m++){
-            var ex = t.exCols[m];
-            this.drawTag(ex,m);
-
-        }
-         for(var p = 0; p < this.prefCols.length; p++){
-                          var ta = this.prefCols[p];
-                            this.drawPrefTags(ta,p);
-
-                        }
-        if(t.state == "default"){
-                   
-                   
-                    
-                    if(t.zoneBtns[2].selected == true){
-                        var cur = t.getSelectedZone();
-                       if(cur.img != 'booth'){
-                            t.pathImg.src = 'img/paths/' + cur.img +'.png';
-                            t.drawImage(t.pathImg,0,0,t.WIDTH,t.HEIGHT);
-                        }
-                        
-                    }
-                    for(var z = 0; z < t.zoneBtns.length; z++){
-
-                        var zb = t.zoneBtns[z];
-                        
-                        if(zb.popTimer <= 0){
-                            t.drawZoneBtn(zb,24,z);
-                        }
-
-                    }
-        }
+        //draw Heatmap key
         if(t.state == 'heatmap'){
-             t.drawImage(t.heatmapKey,t.heatMapBtn.x - 25, t.heatMapBtn.y - 125, 50,150 );
-             t.drawText("Heat Map", t.heatMapBtn.x ,t.heatMapBtn.y + (t.heatMapBtn.r + 25),15,t.textCol.mid,100);
+             dl.drawImage(t.ctx,t.heatmapKey,t.heatMapBtn.x - 25, t.heatMapBtn.y - 125, 50,150 );
+             dl.drawText(t.ctx,"Heat Map", t.heatMapBtn.x ,t.heatMapBtn.y + (t.heatMapBtn.r + 25),15,t.textCol.mid,100);
              
         }
+        //draw backbutton when in PDP mode
         if(t.exState == 'PDP'){
-            t.drawImage(t.backImg,t.backBtn.x,t.backBtn.y,t.backBtn.w,t.backBtn.h);
-           
-            
+            dl.drawImage(t.ctx,t.backImg,t.backBtn.x,t.backBtn.y,t.backBtn.w,t.backBtn.h);
+            dl.drawLeftText(t.ctx,t.topText ,70 + 10 + t.backBtn.w,t.exCol.y - 15, 25,t.textCol.dark,t.exCol.w);
         }
-        if(t.drawDir == true){
-          this.drawImage(t.dragExImg,t.exCol.x-10,t.exCol.y,t.exCol.w+20,t.exCol.h);
+        //draw 
+        if(t.exState == 'tabs'){
+             var l = t.exCols.length;
+             l = l -1;
+            if(t.searchTags.length < 0){
+                 dl.drawLeftText(t.ctx,t.topText ,70 ,t.exCol.y - 15, 25,t.textCol.dark,t.exCol.w);
+            }
+            else{
+                if(t.exCols.length > 0 && t.zoneBtns[0].selected == false){
+                     dl.drawImage(t.ctx,t.backImg,t.backBtn.x,t.backBtn.y,t.backBtn.w,t.backBtn.h);
+                     dl.drawLeftText(t.ctx,t.topText ,70 + 10 + 30,t.exCols[l].y - 15, 25,t.textCol.dark,t.exCol.w);
+                
+                }
+            else if(t.zoneBtns[0].selected == false && t.zoneBtns[1].selected == false){
+                    dl.drawLeftText(t.ctx,t.topText ,70 ,t.exCol.y - 15, 25,t.textCol.dark,t.exCol.w);
+                }
+            }
+            if(t.zoneBtns[0].selected == true ){
+               if(l == 0){
+                   dl.drawImage(t.ctx,t.backImg,t.backBtn.x,t.backBtn.y - 20,t.backBtn.w,t.backBtn.h);
+                    dl.drawLeftText(t.ctx,t.topText ,70 + 10 + 30,t.exCols[l].y - 15, 25,t.textCol.dark,t.exCol.w);
+                }
+                   
+                else if(l > 0){
+                     dl.drawImage(t.ctx,t.backImg,t.backBtn.x,t.backBtn.y,t.backBtn.w,t.backBtn.h);
+                    dl.drawLeftText(t.ctx,t.topText ,70 + 10 + 30,t.exCols[l].y - 15, 25,t.textCol.dark,t.exCol.w);
+                }
+                else{
+                     dl.drawImage(t.ctx,t.backImg,t.backBtn.x,t.backBtn.y,t.backBtn.w,t.backBtn.h);
+                    dl.drawLeftText(t.ctx,t.topText ,70 + 10 + t.backBtn.w,t.exCol.y - 15, 25,t.textCol.dark,t.exCol.w);
+                }
+               
+            }
+            if(t.zoneBtns[1].selected == true ){
+                    dl.drawImage(t.ctx,t.backImg,t.backBtn.x,t.backBtn.y,t.backBtn.w,t.backBtn.h);
+                    dl.drawLeftText(t.ctx,t.topText ,70 + 10 + t.backBtn.w,t.exCol.y - 15, 25,t.textCol.dark,t.exCol.w);
+                }
             
+                   
+
         }
-        t.drawImage(t.userLocImg,945,336,26,30);
-       
-      
-        //this.drawCircle(this.techColEx.cx,this.techColEx.cy,this.techColEx.r,'black',.8);
+        //draw user location PIN
+        dl.drawImage(t.ctx,t.userLocImg,945,336,26,30);
+        var tagToDraw = undefined;
+        var indx = undefined;
+        //draw center tags
+         for(var k = 0; k < this.tagCols.length; k++){
+            
+                var ta = this.tagCols[k];
+                    this.drawTag(ta,k);
+             
+                if(ta.selected == true){
+                   tagToDraw = ta;
+                   indx = k;
+                }
+        }
+        //draw exhibit tags
+        for(var m = 0; m < t.exCols.length; m++){
+
+            var ex = t.exCols[m];
+            this.drawTag(ex,m);
+            if(ex.selected == true){
+               
+                   tagToDraw = ex;
+                   indx = m;
+
+                }
+        }
+        //draw prfeered tags
+        for(var p = 0; p < this.prefCols.length; p++){
+                var ta = this.prefCols[p];
+                    this.drawPrefTags(ta,p);
+                if(ta.selected == true){
+                   tagToDraw = ta;
+                   indx = p;
+                }
+
+        }
+      //draw drag here directions
+      if(t.drawDir == true){
+         t.drawDirection();
+      }
+      //draw phone messgage for active user
+      if(t.activeUser == true){
+         dl.wrapText(t.ctx,'TAP HERE TO REMOVE EMULATED PHONE',t.phoneCol.x + t.phoneCol.w/2,t.phoneCol.y + t.phoneCol.h/3, 30,t.textCol.dark, t.phoneCol.w/1.5,25);
+      }
+      //draw phone message for no active user
+      if(t.activeUser == false){
+         dl.wrapText(t.ctx,'TAP HERE TO EMULATE A DETECTED PHONE',t.phoneCol.x + t.phoneCol.w/2,t.phoneCol.y + t.phoneCol.h/3, 30,t.textCol.dark, t.phoneCol.w/1.5,25);
+      }
+      //draw the header
+      dl.drawImage(t.ctx,t.headerImg,t.WIDTH/2 - 320,70,640,100);
+      //draw a slected tag above emverything else
+      if(tagToDraw != undefined){
+             this.drawTag(tagToDraw,indx);
+      }
+        
 
     },
     update: function () {
         var t = this;
         requestAnimationFrame(this.update.bind(this));
-       // console.log(t.curInfo[0]);
-       // t.getSelectedZone();
-       //console.log(t.getCurrentInfo());
+
+        t.updateZones();
         t.updateInfoCards();
         if(t.canScroll == false){
             t.handleCurrentInfo();
@@ -578,100 +503,196 @@ app.main = {
            t.cINFO[0].y = t.exCol.y;
            //console.log(t.cINFO[0].name);
         }
-        t.updateSearchtags();
+       // t.updateSearchtags();
         t.handleVistedMode();
         t.handleActiveUser();
         t.handleHeatMap();
-        t.updateZones();
-         t.setZonesforInfo();
+       
+        t.setZonesforInfo();
         t.updateZoneBtns();
         t.handleTagCollisons();
         t.updateSelectedTag();
+        t.updateForText();
         if(this.dragging == false){
             t.updateCenterTags();
             t.updateUserPrefTags();
             t.updateExTags();
 
         }
-       
+        t.updateREX();
+        t.noCollider();
+      
         t.draw();
+        //console.log(t.justPressed);
 
     },
+    //updtae th elocation of the echibit collider for touch
+    updateREX: function(){
+            var t = this;
+            var l = t.exCols.length;
+                l = l-1;
+            if(l >= 0 ){
+                t.rexCol.y = t.exCols[l].oy;
+                t.rexCol.h = t.HEIGHT - t.exCols[l].oy;
+            }
+            else{
+                t.rexCol = {
+                    x:70,
+                    w:t.exCol.w,
+                    y:t.exCol.y,
+                    h:t.exCol.h,
+
+                };
+            }
+            
+    },
+    //udate the backbuttons location
+    updateForText: function(){
+        var t = this;
+        var l = t.exCols.length;
+            l = l-1;
+        if(t.zoneBtns[0].selected == true && l > 0){
+             var curZone = t.getSelectedZone();
+                t.topText = curZone.name;
+                 t.backBtn = {
+                    x:70,
+                    y:t.exCols[l].y -40,
+                    w:32,
+                    h:32,
+                }
+        }
+        else{
+            t.backBtn = {
+                x:70,
+                y:t.exCol.y -40,
+                w:32,
+                h:32,
+            }
+        }
+        if(t.zoneBtns[0].selected == false && l > -1){
+            
+                 t.backBtn = {
+                    x:70,
+                    y:t.exCols[l].y -40,
+                    w:32,
+                    h:32,
+                }
+        }
+    },
+    containsAll: function(needles,haystack){
+        var searchNames = [];
+        for(var j = 0; j < needles.length; j++){
+            searchNames.push(needles[j].name);
+        }
+        //console.log(searchNames);
+        for(var i = 0; i < needles.length; i ++){
+            
+            if($.inArray(searchNames[i],haystack) == -1) return false;
+        }
+          return true;
+    },
+    checkfortags: function(a,b){
+        var n = 0;
+        var sn = [];
+        for(var j = 0; j < b.length; j++){
+            sn.push(b[j].name);
+        }
+        //console.log(sn);
+        for(var i = 0; i < a.tags.length; i++){
+            var tag = a.tags[i];
+            //console.log(tag);
+                if(sn.indexOf(tag) > -1){
+                    //console.log(tag);
+                    n++;
+                }
+           
+        }
+        //console.log(n);
+        if(n > 0 ){
+            return true;
+        }
+        else{
+            return false;
+        }
+    },
+    containsAny: function(array1, array2) {
+      var sn = [];
+      //console.log(array1);
+        for(var j = 0; j < array1.length; j++){
+            
+            sn.push(array1[j].name);
+        }
+         //console.log(array2);
+         //console.log(sn);
+      for (var i=0; i<array2.length; i++) {
+
+          for (var w=0; w<sn.length; w++) {
+           // console.log(sn[w]);
+              if (array2[i] == sn[w]) return true;
+          }
+      }
+      return false;
+    }, 
+    //handle what shows up  in the exhibit info section
     handleCurrentInfo: function(){
         var t = this;
         t.currentInfos = [];
         t.curInfo = [];
 
-        if(t.searchTags.length < 1){
-             
-
-            for(var i = 0; i < t.shuffedArray.length; i ++){
+        //if there is nothing to sort by set info to random exhibits
+        if(t.searchTags.length < 1 ){
+            //limit to 20
+             for(var i = 0; i < 20; i ++){
                 t.currentInfos.push(t.shuffedArray[i]);
-
             }
         }
-        if(t.searchTags.length >0 && t.zoneBtns[0].selected == false){
-            //console.log('morethan1');
+        //if there are search terms and the tag button has not been clicked
+        //filter the tags byt the searchterm
+        if(t.searchTags.length > 0 && t.zoneBtns[0].selected == false){
+            
             for(var i = 0; i < t.exInfo.length; i++){
                 var ex = t.exInfo[i];
-                for(var j= 0; j < ex.tags.length; j++){
-                    var tag = ex.tags[j];
-                    //console.log(tag);
-                    for(var k = 0; k < t.searchTags.length; k++){
-                        var term = t.searchTags[k];
-                       
-                        if(t.currentInfos.indexOf(ex) <= -1){
-                             if(tag == term.name){
-                                        t.currentInfos.push(ex);
-                                   
-                                }
-                        }
-                    }
-                }
+                if(t.containsAll(t.searchTags,ex.tags)){
+                         t.currentInfos.push(ex);
+
+                   }
                 
             }
+
+
         }
-        if(t.getSelectedZone() && t.zoneBtns[0].selected == true){
-             t.currentInfos = [];
+        
 
-            var curZone = t.getSelectedZone();
-                curZone = curZone.name;
-            for(var b = 0; b < t.exInfo.length; b++){
-                var ex = t.exInfo[b];
-                if(ex.zone == curZone){
-                    t.currentInfos.push(ex);
-                }
-            }
+        if(t.getSelectedZone() && t.zoneBtns[0].selected == true ){
+           t.tagBtnInfos();
+           if(t.searchTags.length <= 0){
+              t.zoneBtns[0].selected = false;
+           }
+          
+        }
             
-       }
-
+          
 
        if(t.getSelectedZone() && t.zoneBtns[1].selected == true){
-            t.currentInfos = [];
-            var curZone = t.getSelectedZone();
-                curZone = curZone.name;
-            for(var b = 0; b < t.exInfo.length; b++){
-                var ex = t.exInfo[b];
-                if(ex.zone == curZone){
-                    t.currentInfos.push(ex);
-                }
-            }
+           t.addAllBoothsInZone();
        }
+
+       
        if(t.recoBtn.selected == true && t.prefs.length > 0){
        
-             var rArray  = t.recco();
+            var rArray  = t.recco();
             t.currentInfos = [];
 
             for(var c = 0; c < t.exInfo.length; c++){
                 var curInf = t.exInfo[c];
-                for(var g = 0; g < 2; g++){
+                for(var g = 0; g < 10; g++){
                     if(curInf.code == rArray[g].code){
                         t.currentInfos.push(curInf);
                     }
                 }
             }
            
-            //console.log(t.currentInfos);
+           
        }
 
 
@@ -681,6 +702,67 @@ app.main = {
       }
        //console.log(t.currentInfos.length);
     },
+    tagBtnInfos: function (){
+      var t = this;
+         if(t.searchTags.length > 0){
+            //add the exhibits
+            var curZone = t.getSelectedZone();
+             for(var i = 0; i < t.exInfo.length; i++){
+                var ex = t.exInfo[i];
+                if(t.containsAny(t.searchTags,ex.tags)){
+                    if(ex.zone == curZone.name){
+                         t.currentInfos.push(ex);
+                       }
+
+                   }
+                
+            }
+          }
+        },
+    addAllBoothsInZone: function(){
+      var t = this;
+       t.currentInfos = [];
+       var curZone = t.getSelectedZone();
+           curZone = curZone.name;
+           for(var b = 0; b < t.exInfo.length; b++){
+               var ex = t.exInfo[b];
+               if(ex.zone == curZone){
+                  t.currentInfos.push(ex);
+                }
+            }
+    },
+    setAllZoneTags: function(){
+
+      var t = this;
+      var curZone = t.getSelectedZone();
+      for(var i = 0 ; i < t.exInfo.length; i ++){
+          var ex  = t.exInfo[i];
+          if(ex.zone == curZone.name){
+           
+              for(var j = 0; j < ex.tags.length; j ++){
+                var curtag = ex.tags[j];
+               
+                var pos = t.searchTags.map(function(e) { return e.name; }).indexOf(curtag);
+                var prefPos = t.prefs.map(function(e) { return e.name; }).indexOf(curtag);
+               if( pos <= -1){
+
+                if(prefPos > -1){
+                  t.prefs.splice(prefPos,1);
+                  t.searchTags.push({name:curtag , prefd:true , selected:false});
+                }
+                else{
+
+                }
+                 //console.log(ex.tags[j]);
+                 t.searchTags.push({name:curtag , prefd:false , selected:false});
+               }
+          
+          }
+        }
+      }
+     
+      
+   },
    setInfoXYs: function(){
     var t = this;
          for(var q = 0; q < t.currentInfos.length; q++){
@@ -698,21 +780,17 @@ app.main = {
    },
    setZonesforInfo: function(){
     var t = this;
+    if(t.exCols > 0){
+      //  console.log('gothere');
+    for(var i = 0; i < this.currentInfos.length; i++){
+        var ci = this.currentInfos[i];
+        for(var z =0; z< t.zones.length; z++){
+            if (ci.zone == t.zones[z].name){
 
-    /// DO THIS. FOR CUR INFO
-    if(t.getSelectedZone() == undefined && t.state == 'FIX'){
-        var tagsToCheck = t.curInfo[0].tags;
-         for(var i = 0; i < tagsToCheck.length; i++){
-                var ci  = tagsToCheck[i];
-
-                for(var j = 0; j < t.zones.length; j++){
-                    var zo = t.zones[j];
-                    if(ci.zone == zo.name){
-                        //console.log('t');
-                        zo.state = 'hightlighted';
-                    }
-                }
+                t.zones[z].state = "highlighted";
+            }
         }
+    }
     }
    // else{
        
@@ -733,7 +811,7 @@ app.main = {
                         var pr = t.prefs[j];
                        
                         if(pr.name == ka ){
-                            console.log('jess');
+                            
                             n+= 50;
 
 
@@ -849,26 +927,69 @@ app.main = {
             if(zo.hmN == 0){
                 zo.state = 'grey';
             }
-
-            if(zo.hmN > 0 && zo.hmN <= hmNAvg - (qAvg*2)){
-                zo.state = 'heatmap1';
+            if(zo.name == 'Artistic Alley'){
+                if(zo.hmN > 0 && zo.hmN <= hmNAvg - (qAvg*2)){
+                    zo.state = 'heatmap1';
+                }
+                if(zo.hmN > hmNAvg - (qAvg*2) && zo.hmN <= qAvg ){
+                    zo.state = 'heatmap2';
+                }
+                if(zo.hmN > qAvg && zo.hmN <= hmNAvg + qAvg){
+                    zo.state = 'heatmap3';
+                }
+                if(zo.hmN > hmNAvg + (qAvg*2)){
+                    zo.state = 'heatmap4';
+                }
             }
-            if(zo.hmN > hmNAvg - (qAvg*2) && zo.hmN <= qAvg ){
-                zo.state = 'heatmap2';
-            }
-            if(zo.hmN > qAvg && zo.hmN <= hmNAvg + qAvg){
-                zo.state = 'heatmap3';
-            }
-            if(zo.hmN > hmNAvg + (qAvg*2)){
-                zo.state = 'heatmap4';
+            else{
+                zo.state = 'grey';
             }
             //console.log(zo.state);
         }
 
     }
+    if(t.state == 'default'){
+        t.visitedBtn.selected = false;
+    }
 
    },
+   clearSearch: function (){
+    var t = this;
+         //var pos = t.searchTags.map(function(e) { return e.name; }).indexOf(ci.tags[i]);
+         t.resetTags();
+         t.exCols =[];
+         t.exTags = [];
+         t.prefTags = [];
+         t.prefCols=[];
 
+         for(var i = 0; i < t.searchTags.length; i++){
+               // console.log(t.searchTags[i].prefd);
+                var ser = t.searchTags[i];
+                if(ser.prefd == true){
+                    var pos = t.prefs.map(function(e) { return e.name; }).indexOf(ser.name);
+                    //console.log(t.prefs)
+                    if(pos <= -1){
+                       t.prefs.push({name:ser.name , prefd:true, selected:false});
+                    }
+                }
+                //var pos = t.searchTags.map(function(e) { return e.name; }).indexOf(ser.name);
+                t.searchTags.shift();
+                t.resetTags();
+                var sl = t.searchTags.length;
+                    sl = sl-1;
+                if(i >= sl){
+                        t.searchTags = [];
+                         t.exCols =[];
+                         t.exTags = [];
+                         t.prefTags = [];
+                         t.prefCols = [];
+                         t.resetTags();
+
+                }
+         }
+         //t.searchTags = [];
+         //console.log(t.searchTags);
+   },
   
     checkCol: function (a, b) {
         var circle1 = { r: a.r, x: a.x, y: a.y };
@@ -923,43 +1044,7 @@ app.main = {
       return Math.sqrt( xs + ys );
     },
    
-   updateSearchtags: function(){
-   var t = this;
-
-   /* if(t.exState == 'PDP'){
-        
-
-        for(var i = 0; i < t.searchTags.length; i++){
-            var st = t.searchTags[i];
-            
-                if(st.prefd == true){
-                    t.prefs.push(st);
-                }
-                
-        }
-
-        for(var f = 0; f < t.cINFO[0].tags.length; f++){
-            var fu = t.cINFO[0].tags[f];
-
-            if(t.prefs.indexOf(fu) > -1){
-                t.searchTags.push({name: fu, prefd: true, selected:false});
-                var ind = t.pref.indexOf(fu);
-                t.prefs.splice(ind,q);
-               
-
-            }
-            else{
-                 t.searchTags.push({name: fu, prefd:false, selected:false});
-            }
-        }
-    }
-    */
-
-
-
-
-
-   },
+  
    
     
     
@@ -967,36 +1052,49 @@ app.main = {
     updateSelectedTag: function(){
         
        var t = this;
-       t.doSelect(t.tagCols,true,false);
-       t.doSelect(t.prefCols,true,false);
-       t.doSelect(t.exCols,false,false);
-       
+       t.doSelect(t.tagCols,true,false,'c');
+       t.doSelect(t.prefCols,true,false,'p');
+       t.doSelect(t.exCols,false,false,'e');
+       if(t.curTag < 1){
+        t.drawDir = false;
+       }
+    
+      
     },
 
-    doSelect: function (tagArray,draw,dont){
+    doSelect: function (tagArray,draw,dont,type){
         var t = this;
          for(var i = 0; i < tagArray.length; i ++){
             var ta = tagArray[i];
              ta.selected = false;
             if(ta.name == this.curTag[0]){
                 ta.selected = true;
-                
+               
             }
             else{
-                ta.selected = false;
+               
+               // ta.selected = false;
                  //t.drawDir = dont;
             }
             if(this.dragging == false && ta.x != ta.ox && ta.y != ta.oy){
-                ta.selected = false;
+                //ta.selected = false;
+                // t.drawDir = dont;
             }
             if(ta.selected == false){
                 ta.x = ta.ox;
                 ta.y = ta.oy;
+                //t.drawDir = dont;
              
 
             }
+            if(ta.selected == true){
+                 t.drawDir = draw;
+                 t.canScroll = false;
+                 t.currentTagType = type;
+            }
             if(this.dragging == false && ta.x == ta.ox && ta.y == ta.oy){
              //ta.selected = false
+              //t.drawDir = dont
             }
 
             
@@ -1041,6 +1139,7 @@ app.main = {
             if(a.name > b.name) return 1;
             return 0;
         });
+
           var rowsToPush = [t.row1,t.row2,t.row3,t.row4,t.row5];
         //console.log(t.centerTags.length);
         var ctLength = t.centerTags.length;
@@ -1092,7 +1191,7 @@ app.main = {
             var newWidth = (t.tagimgSize*4) + (strlength * t.tagtextSize/1.5);
             var newHeight = (t.tagimgSize*2);
            
-            this.centerTags.push({x:ta.x, y:ta.y,name:ta.name, img:ta.img, w:newWidth, h: newHeight, selected:false, prefd:t.toPref});
+            this.centerTags.push({x:ta.x, y:ta.y,name:ta.name, img:ta.img, w:newWidth, h: newHeight, selected:t.undefined, prefd:t.toPref});
         }   
     },
     handleActiveUser: function(){
@@ -1146,11 +1245,10 @@ app.main = {
     
         var pLength = t.prefTags.length;
         var maxItemsinRow = Math.ceil(pLength/6);
-       // console.log(maxItemsinRow);
         var rowsToPush = [row1,row2,row3,row4,row5,row6];
 
         for(var i = 0; i < t.prefTags.length; i++){
-            //var n = i+1;
+           
             var r = rowsToPush[0];
             rowsToPush.push(r);
             r.push(t.prefTags[i]);
@@ -1164,11 +1262,7 @@ app.main = {
        var r4y = r3y + ySpace;
        var r5y = r4y + ySpace;
        var r6y = r5y + ySpace;
-      // var r7y = r6y + ySpace;
-       //var r8y = r7y + ySpace;
-      
-
-       //console.log(t.prefCols);
+     
 
 
        t.setRowTagsXY(row1,r1y,'p');
@@ -1177,10 +1271,7 @@ app.main = {
        t.setRowTagsXY(row4,r4y,'p');
        t.setRowTagsXY(row5,r5y,'p');
        t.setRowTagsXY(row6,r6y,'p');
-      // t.setRowTagsXY(row7,r7y,'p');
-       //t.setRowTagsXY(row8,r8y,'p');
-      
-       // console.log(t.prefCols);
+     
       
        t.pushTagsToDraw(row1,t.prefCols);
        t.pushTagsToDraw(row2,t.prefCols);
@@ -1188,8 +1279,7 @@ app.main = {
        t.pushTagsToDraw(row4,t.prefCols);
        t.pushTagsToDraw(row5,t.prefCols);
        t.pushTagsToDraw(row6,t.prefCols);
-       //t.pushTagsToDraw(row7,t.prefCols);
-       //t.pushTagsToDraw(row8,t.prefCols);
+      
      
         
         for(var j = 0 ; j < t.prefCols.length; j++){
@@ -1206,6 +1296,15 @@ app.main = {
         var row2 = [];
         var row3 = [];
         var row4 = [];
+        var row5 = [];
+        var row6 = [];
+        var row7 = [];
+        var row8 = [];
+        var row9 = [];
+        var row10 = [];
+        var row11 = [];
+        var row12 = [];
+        var row13 = [];
        
 
         t.exCols = [];
@@ -1214,7 +1313,7 @@ app.main = {
         var pLength = t.exTags.length;
         var maxItemsinRow = Math.ceil(pLength/6);
       
-        var rowsToPush = [row1,row1,row2,row2,row3,row3,row4,row4];
+        var rowsToPush = [row1,row1,row2,row2,row3,row3,row4,row4,row5,row5,row6,row6,row7,row7,row8,row8,row9,row9,row10,row10,row11,row11,row12,row12,row13,row13];
 
         for(var i = 0; i < t.exTags.length; i++){
           
@@ -1235,20 +1334,50 @@ app.main = {
         var r2y = r1y - ySpace;
         var r3y = r2y - ySpace;
         var r4y = r3y - ySpace;
+        var r5y = r4y - ySpace;
+        var r6y = r5y - ySpace;
+        var r7y = r6y - ySpace;
+        var r8y = r7y - ySpace;
+        var r9y = r8y - ySpace;
+        var r10y = r9y - ySpace;
+        var r11y = r10y - ySpace;
+        var r12y = r11y - ySpace;
+        var r13y = r12y - ySpace;
+
      
-       t.setRowTagsXY(row1,r1y,'e');
-       t.setRowTagsXY(row2,r2y,'e');
-       t.setRowTagsXY(row3,r3y,'e');
-       t.setRowTagsXY(row4,r4y,'e');
+        t.setRowTagsXY(row1,r1y,'e');
+        t.setRowTagsXY(row2,r2y,'e');
+        t.setRowTagsXY(row3,r3y,'e');
+        t.setRowTagsXY(row4,r4y,'e');
+        t.setRowTagsXY(row5,r5y,'e');
+        t.setRowTagsXY(row6,r6y,'e');
+        t.setRowTagsXY(row7,r7y,'e');
+        t.setRowTagsXY(row8,r8y,'e');
+        t.setRowTagsXY(row9,r9y,'e');
+        t.setRowTagsXY(row10,r10y,'e');
+        t.setRowTagsXY(row11,r11y,'e');
+        t.setRowTagsXY(row12,r12y,'e');
+        t.setRowTagsXY(row13,r13y,'e');
+       
+
+
        t.pushTagsToDraw(row1,t.exCols);
        t.pushTagsToDraw(row2,t.exCols);
        t.pushTagsToDraw(row3,t.exCols);
        t.pushTagsToDraw(row4,t.exCols);
+       t.pushTagsToDraw(row5,t.exCols);
+       t.pushTagsToDraw(row6,t.exCols);
+       t.pushTagsToDraw(row7,t.exCols);
+       t.pushTagsToDraw(row8,t.exCols);
+       t.pushTagsToDraw(row9,t.exCols);
+       t.pushTagsToDraw(row10,t.exCols);
+       t.pushTagsToDraw(row11,t.exCols);
+       t.pushTagsToDraw(row12,t.exCols);
+       t.pushTagsToDraw(row13,t.exCols);
     
-        for(var j = 0 ; j < t.exCols.length; j++){
+       for(var j = 0 ; j < t.exCols.length; j++){
             this.exImgs.push(new Image());
-           
-        }
+       }
        
     },
     //prefs/searchtagas to new array as objects to be sorted
@@ -1346,12 +1475,26 @@ app.main = {
     pushTagsToDraw: function (row,array){
         for(var i = 0; i < row.length; i++){
             var r = row[i];
+            var sel;
+           // console.log(r.selected);
+            if(row[i].name == this.curTag[0]){
+                var sel = true;
+            }
+            else{
+                if(r.selected != undefined){
+                    sel = r.selected;
+                }
+                else{
+                    sel = false;
+                }
+                
+            }
             array.push({
                 x:r.x,
                 y:r.y,
                 name:r.name,
                 img:r.img,
-                selected: r.selected,
+                selected: sel,
                 ox: r.x,
                 oy: r.y,
                 w: r.w,
@@ -1376,21 +1519,25 @@ app.main = {
                    
                     t.updateCenterTags();
                     t.updateUserPrefTags();
+                    t.curTag = [];
                    
                     
                 }
              }
-             if(t.rectCol(tag,t.exCol)){
+             if(t.rectCol(tag,t.rexCol)){
                // console.log(t.searchTags.length);
                 if(t.dragging == false ){
                     tag.selected = false;
-                    if(t.searchTags.length <= 7 && t.exState != 'PDP'){
+                    if(t.searchTags.length <= 7 && t.exState != 'PDP' && t.zoneBtns[0].selected == false ){
                         t.searchTags.push({name:tag.name , prefd:false , selected:false});
+                         t.topText = 'Browse Tags';
                     }
                     t.updateCenterTags();
                     t.updateExTags();
                     t.toPref = false;
+                    t.seld = false;
                     t.handleCurrentInfo();
+                    t.curTag = [];
                 }
              }
 
@@ -1398,29 +1545,47 @@ app.main = {
          for(var k = 0; k < t.exCols.length; k++){
              var tag = t.exCols[k];
              if(this.dragging == false && tag.x != tag.ox && tag.y != tag.ox){
-                //console.log(tag.prefd);
+                //console.log(tag.prefd); t.updateInfoCards();
+
+               
                 if(tag.prefd == true){
                      t.prefs.push({name: tag.name, prefd:true , selected:false});
                      
 
                 }
                 for(var e = 0; e < t.searchTags.length; e++){
-                    if(t.searchTags[e].name == tag.name && t.exState == 'tabs'){
+                    if(t.searchTags[e].name == tag.name && t.exState == 'tabs' ){
                             
-
+                            //console.log(t.searchTags);
                             t.searchTags.splice(e,1);
                             t.resetTags();
                              t.exTags = [];
                              t.exCols = [];
+                              t.updateCenterTags();
+                             t.updateUserPrefTags();
+                            t.updateExTags();
+                             if(t.searchTags.length < 0 && t.zoneBtns[0].selected == false){
+                                t.topText = "Featured Exhibits";
+                                t.currentInfos = [];
+                              
+                             }
+                             if(t.zoneBtns[0].selected == true){
+
+                             }
+                              
+                            
+
                     }
                 }
+                if(t.searchTags.length <= 0){
+                        t.topText = "Featured Exhibits";
+                 }
                 t.prefTags = [];
                  t.prefCols = [];
-                  
+                   t.curTag = [];
 
-                t.updateCenterTags();
-                t.updateUserPrefTags();
-                t.updateExTags();
+               
+
                // t.updateUserPrefTags();
              }
 
@@ -1444,7 +1609,7 @@ app.main = {
                              t.prefCols = [];
                              t.exCols = [];
                              t.exTags = [];
-                            
+                             t.curTag = [];
                   
                              break;
 
@@ -1459,7 +1624,7 @@ app.main = {
                 if(t.dragging == false && tag.x != tag.ox){
                     
                             tag.prefd = true;
-                            if(t.searchTags.length <= 7 && t.exState != 'PDP'){
+                            if(t.searchTags.length <= 7 && t.exState != 'PDP' && t.zoneBtns[0].selected == false){
                                 t.searchTags.push({name:tag.name , prefd:true , selected:false});
                             
                             t.exCols = [];
@@ -1477,7 +1642,7 @@ app.main = {
                                     t.resetTags();
                                     t.prefTags = [];
                                     t.prefCols = [];
-                               
+                                     t.curTag = [];
                  
                                     break;
 
@@ -1556,6 +1721,15 @@ app.main = {
                           t.zoneBtns[2].x = undefined;
                         t.zoneBtns[2].y = undefined;
                     }
+                    if(t.exState == 'PDP'){
+                        t.zoneBtns[0].x = undefined;
+                        t.zoneBtns[0].y = undefined;
+                        t.zoneBtns[1].x = undefined;
+                        t.zoneBtns[1].y = undefined;
+                        t.zoneBtns[2].x -= 50;
+                        t.zoneBtns[2].y -= 25;
+
+                    }
                      zb.cx = zb.x;
                     zb.cy = zb.y;
 
@@ -1583,26 +1757,22 @@ app.main = {
         if(t.state == 'default'){
         for(var i =0; i < t.zones.length; i ++){
             var zo = t.zones[i];
-           if(t.currentZone.length > 0){
-                if(zo.name == t.currentZone[0].name){
-                    //console.log(zo.name);
-                    zo.state = 'selected'
-                }
-                else{
-                    zo.state = 'default';
-                }
-            }
+          
             if(t.currentZone.length <= 0){
-               
+                    
                     zo.state = 'default';
+
             }
             if(t.exState == "PDP"){
                     zo.state = 'default';
+                if(t.cINFO.length > 0){
                     if(zo.name == t.cINFO[0].zone){
-                        zo.state = 'hightlighted';
+                        zo.state = 'selected';
                     }
+                }
             }
             if(t.recoBtn.selected == true){
+                if(t.prefs.length > 0){
                  for(var q = 0; q < t.currentInfos.length; q++){
                     var ci = t.currentInfos[q];
                     for(var z = 0 ; z < t.zones.length; z++){
@@ -1617,6 +1787,55 @@ app.main = {
             }
             }
         }
+        if(t.searchTags.length > 0 && t.recoBtn.selected == false && t.zoneBtns[0].selected == false){
+
+            for(var y = 0 ; y < t.zones.length; y++){
+                   t.zones[y].state = 'grey';
+              }
+                
+                 for(var q = 0; q < t.currentInfos.length; q++){
+                    var ci = t.currentInfos[q];
+                    for(var z = 0 ; z < t.zones.length; z++){
+                      
+                        if(ci.zone == t.zones[z].name){
+                            // console.log(ci.zone, t.zones[z].name);
+                            t.zones[z].state = 'hightlighted';
+                           
+                        }
+                       
+                         
+                        
+                       
+                       
+                             
+                        
+                    }
+
+            
+            }
+        }
+        
+         if(t.currentZone.length > 0){
+                if(zo.name == t.currentZone[0].name){
+                    //console.log(zo.name);
+                    zo.state = 'selected'
+                }
+                else{
+                    zo.state = 'default';
+                }
+            }
+        }
+        if(t.exState == 'PDP'){
+           for(var y = 0 ; y < t.zones.length; y++){
+                  if(t.zones[y].state == 'default'){
+                    t.zones[y].state = 'grey';
+                  }
+              }
+        }
+        t.setZonesforInfo();
+    }
+    if(t.zoneBtns[0].selected == false && t.searchTags.length > 0){
+        t.currentZone = [];
     }
 
     },
@@ -1632,64 +1851,11 @@ app.main = {
     },
     //DRAW FUNCTIONS
 
-    loadImages: function () {
-
-        this.mapImage = new Image();
-        this.mapImage.src = "img/map.jpg";
-
-        this.phoneZone = new Image();
-        this.phoneZone.src = "img/misc/phonezone.png";
-
-        this.heatmapImg = new Image();
-        this.heatmapImg.src = "img/btns/dark/heatmap.png";
-
-        this.heatmapKey = new Image();
-        this.heatmapKey.src = "img/misc/heatmap-key.png";
-
-        this.recoImg = new Image();
-        this.recoImg.src = "img/btns/dark/recommended.png";
-
-        this.visitImg = new Image();
-        this.visitImg.src = "img/btns/dark/visited.png";
-
-        this.xImg = new Image();
-        this.xImg.src = "img/btns/white/X.png";
-
-        this.lgImg = new Image();
-        this.lgImg.src = "img/lowerdGrad.png";
-
-        this.backImg = new Image();
-        this.backImg.src = "img/misc/back.png";
-
-        this.forImg = new Image();
-        this.forImg.src = "img/misc/forward.png";
-
-        this.distanceImg = new Image();
-        this.distanceImg.src = "img/misc/distance.png";
-        
-        this.locationImg = new Image();
-        this.locationImg.src = "img/misc/location.png";
-        
-        this.userImg = new Image();
-        this.userImg.src = "img/misc/user.png";
-        
-        this.timeImg = new Image();
-        this.timeImg.src = "img/misc/time.png";
-        
-        this.hideImg = new Image();
-        this.hideImg.src = "img/hide.png";
-
-        this.userLocImg = new Image();
-        this.userLocImg.src = "img/misc/userLoc.png";
-
-        this.dragExImg = new Image();
-        this.dragExImg.src = "img/misc/dragEx.png";
-
-        
-    },
    
-    drawZoneBtn: function(btn,rad,i) {
+   
+     drawZoneBtn: function(btn,rad,i) {
         var t = this;
+        var dl = app.drawLib;
         var bgCol = 'white';
         var bor  = t.colors.teal;
         var imgPath;
@@ -1709,13 +1875,14 @@ app.main = {
         }
         var imgS = rad + rad/3;
         t.zbtnImgs[i].src = imgPath + btn.img + '.png';
-        t.drawCircShadow(btn.x,btn.y,rad,shadowColor,.2);
-        t.drawOutCircle(btn.x,btn.y,rad,bgCol,.9,bor);
-        t.drawImage(t.zbtnImgs[i],btn.x - imgS/2, btn.y - imgS/2, imgS,imgS);
+        dl.drawCircShadow(t.ctx,btn.x,btn.y,rad,shadowColor,.2);
+        dl.drawOutCircle(t.ctx,btn.x,btn.y,rad,bgCol,.9,bor);
+        dl.drawImage(t.ctx,t.zbtnImgs[i],btn.x - imgS/2, btn.y - imgS/2, imgS,imgS);
 
     },
     drawBtn: function(btn,rad,img) {
         var t = this;
+        var dl = app.drawLib;
         var bgCol = 'white';
         var bor  = t.colors.teal;
         var image;
@@ -1737,107 +1904,146 @@ app.main = {
         var imgS = rad + rad/3;
       
         
-        t.drawOutCircle(btn.x,btn.y,rad,bgCol,.9,bor);
-        t.drawImage(image,btn.x - imgS/2, btn.y - imgS/2, imgS,imgS);
+        dl.drawOutCircle(t.ctx,btn.x,btn.y,rad,bgCol,.9,bor);
+        dl.drawImage(t.ctx,image,btn.x - imgS/2, btn.y - imgS/2, imgS,imgS);
 
     },
-    
+    drawDirection: function (){
+        var t = this;
+        var dl = app.drawLib;
+       if(t.exState == 'tabs'){
+            dl.wrapText(t.ctx,'DRAG HERE TO BROWSE EXHIBITS',t.exCol.x+t.exCol.w/2 + 10,t.exCol.y + t.exCol.h/3 + 50,30, t.textCol.dark, t.exCol.w/1.5,25);
+        }
+        if(t.activeUser == true){
+            // this.drawRect(t.prefsCollier.x - 50,t.prefsCollier.y + 20,t.phoneCol.w+20,t.prefsCollier.h,'#fff',.5);
+            if(t.currentTagType == 'c'){
+                dl.wrapText(t.ctx,'DRAG HERE TO ADD INTEREST',t.prefsCollier.x - 50 + 100 ,t.prefsCollier.y + t.prefsCollier.h/3 + 50,30, t.textCol.dark, t.exCol.w/1.5,25);
+            }
+            if(t.currentTagType == 'p'){
+                dl.wrapText(t.ctx,'DRAG HERE TO REMOVE FROM INTEREST',t.dePerfCol.x + t.dePerfCol.w/2 , t.dePerfCol.y + t.dePerfCol.h/3,30, t.textCol.dark, t.exCol.w/1.5,25);
+            }
+
+           
+      }
+        
+        
+    },
     
     drawTag: function(tag,i){
         var t = this;
-
+        var dl = app.drawLib;
         var ts = t.tagtextSize;
         var imgs = t.tagimgSize;
-        
+        if(t.drawDir == true && t.currentTagType == 'p'){
+             this.ctx.globalAlpha = .3;
+        }
         var name = tag.name.toUpperCase();
         if(tag.selected == false ){
             t.tagImgs[i].src = 'img/Icons/dark/' + tag.img;
-            t.drawOutRect(tag.x,tag.y,tag.w,tag.h,'white',t.textCol.dark);
-            t.drawImage(t.tagImgs[i],tag.x + imgs/2,tag.y + imgs/2,imgs,imgs);
-            t.drawText(name,tag.x +tag.w/2, tag.y + tag.h/1.5,ts,t.textCol.mid,tag.w);
-            t.drawText("+",tag.x +tag.w - imgs, tag.y + tag.h/1.5,ts,t.colors.teal,imgs);
+            dl.drawOutRect(t.ctx,tag.x,tag.y,tag.w,tag.h,'white',t.textCol.dark);
+            dl.drawImage(t.ctx,t.tagImgs[i],tag.x + imgs/2,tag.y + imgs/2,imgs,imgs);
+            dl.drawText(t.ctx,name,tag.x +tag.w/2, tag.y + tag.h/1.5,ts,t.textCol.mid,tag.w);
+            dl.drawText(t.ctx,"+",tag.x +tag.w - imgs, tag.y + tag.h/1.5,ts,t.colors.teal,imgs);
         }
-        /*if(tag.selected == false && tag.prefd == true){
-            t.tagImgs[i].src = 'img/Icons/white/' + tag.img;
-            t.drawOutRect(tag.x,tag.y,tag.w,tag.h,t.colors.gold,t.colors.gold);
-            t.drawImage(t.tagImgs[i],tag.x + imgs/2,tag.y + imgs/2,imgs,imgs);
-            t.drawText(name,tag.x +tag.w/2, tag.y + tag.h/1.5,ts,'white',tag.w);
-            t.drawText("x",tag.x +tag.w - imgs, tag.y + tag.h/1.5,ts,'white',imgs);
-        }*/
         if(tag.selected == true){
             t.tagImgs[i].src = 'img/Icons/white/' + tag.img;
-            t.drawOutRect(tag.x,tag.y,tag.w,tag.h,t.colors.teal,t.textCol.dark);
-            t.drawImage(t.tagImgs[i],tag.x + imgs/2,tag.y + imgs/2,imgs,imgs);
-            t.drawText(name,tag.x +tag.w/2, tag.y + tag.h/1.5,ts,'white',tag.w);
-            t.drawText("+",tag.x +tag.w - imgs, tag.y + tag.h/1.5,ts,'white',imgs);
+            dl.drawOutRect(t.ctx,tag.x,tag.y,tag.w,tag.h,t.colors.teal,t.textCol.dark);
+            dl.drawImage(t.ctx,t.tagImgs[i],tag.x + imgs/2,tag.y + imgs/2,imgs,imgs);
+            dl.drawText(t.ctx,name,tag.x +tag.w/2, tag.y + tag.h/1.5,ts,'white',tag.w);
+            dl.drawText(t.ctx,"+",tag.x +tag.w - imgs, tag.y + tag.h/1.5,ts,'white',imgs);
+        }
+        if(t.drawDir == true && t.currentTagType == 'p'){
+             this.ctx.globalAlpha = 1;
         }
     },
     drawPrefTags: function(tag,i){
         var t = this;
+        var dl = app.drawLib;
         var ts = t.tagtextSize;
         var imgs = t.tagimgSize;
-        
+        if(t.drawDir == true){
+             this.ctx.globalAlpha = .4;
+        }
         var name = tag.name.toUpperCase();
         if(tag.selected == false){
             t.tagImgs[i].src = 'img/Icons/white/' + tag.img;
-            t.drawOutRect(tag.x,tag.y,tag.w,tag.h,t.colors.gold,t.colors.gold);
-            t.drawImage(t.tagImgs[i],tag.x + imgs/2,tag.y + imgs/2,imgs,imgs);
-            t.drawText(name,tag.x +tag.w/2, tag.y + tag.h/1.5,ts,'white',tag.w);
-            t.drawText("x",tag.x +tag.w - imgs, tag.y + tag.h/1.5,ts,'white',imgs);
+            dl.drawOutRect(t.ctx,tag.x,tag.y,tag.w,tag.h,t.colors.gold,t.colors.gold);
+            dl.drawImage(t.ctx,t.tagImgs[i],tag.x + imgs/2,tag.y + imgs/2,imgs,imgs);
+            dl.drawText(t.ctx,name,tag.x +tag.w/2, tag.y + tag.h/1.5,ts,'white',tag.w);
+            dl.drawText(t.ctx,"x",tag.x +tag.w - imgs, tag.y + tag.h/1.5,ts,'white',imgs);
         }
         if(tag.selected == true){
              t.tagImgs[i].src = 'img/Icons/white/' + tag.img;
-            t.drawOutRect(tag.x,tag.y,tag.w,tag.h,t.colors.teal,t.textCol.dark);
-            t.drawImage(t.tagImgs[i],tag.x + imgs/2,tag.y + imgs/2,imgs,imgs);
-            t.drawText(name,tag.x +tag.w/2, tag.y + tag.h/1.5,ts,'white',tag.w);
-            t.drawText("x",tag.x +tag.w - imgs, tag.y + tag.h/1.5,ts,'white',imgs);
+            dl.drawOutRect(t.ctx,tag.x,tag.y,tag.w,tag.h,t.colors.teal,t.textCol.dark);
+            dl.drawImage(t.ctx,t.tagImgs[i],tag.x + imgs/2,tag.y + imgs/2,imgs,imgs);
+            dl.drawText(t.ctx,name,tag.x +tag.w/2, tag.y + tag.h/1.5,ts,'white',tag.w);
+            dl.drawText(t.ctx,"x",tag.x +tag.w - imgs, tag.y + tag.h/1.5,ts,'white',imgs);
+        }
+        if(t.drawDir == true){
+             this.ctx.globalAlpha = 1;
         }
     },
     drawExInfoBar:function(info,i){
+
         var t = this;
+        var dl = app.drawLib;
+         if(t.drawDir == true){
+             this.ctx.globalAlpha = .2;
+        }
         t.exInfoImgs[i].src = 'img/Icons/white/' +info.img;
         var w = t.exCol.w;
         var size = info.h;
-        t.drawRect(info.x,info.y,size,size,info.color);
-        t.drawImage(t.exInfoImgs[i],info.x + (size *.1),info.y + (size *.1),size * .8,size *.8);
-        t.drawText(info.name,info.w/2 + size,info.y +25, 20,t.textCol.dark,info.w - 90);
-        t.drawImage(t.forImg, info.forBtn.x,info.forBtn.y,info.forBtn.w,info.forBtn.h);
-        var tags = info.tags.join(' - ');
-         t.wrapText(tags,info.w/2 + size+10,info.y +50, 15,t.textCol.mid,info.w - 90,15);
+        var ttsize = 13;
+        dl.drawRect(t.ctx,info.x,info.y,size,size,info.color);
+        dl.drawImage(t.ctx,t.exInfoImgs[i],info.x + (size *.1),info.y + (size *.1),size * .8,size *.8);
+        dl.drawLeftText(t.ctx,info.name,150,info.y +15, 15,t.textCol.dark,info.w - 135);
+        dl.drawImage(t.ctx,t.forImg, info.forBtn.x,info.forBtn.y,info.forBtn.w,info.forBtn.h);
+        var tags = info.tags.join(', ');
+        if(info.tags.length >5){
+            ttsize = 15;
+            tags = info.tags[0] +', '+ info.tags[1]+', '+info.tags[2]+', '+ info.tags[3]+', '+info.tags[4]+'....';
+        }
+         dl.wrapTextLeft(t.ctx,tags,150,info.y +40, 15,t.textCol.mid,info.w - 130,ttsize);
+          if(t.drawDir == true){
+             this.ctx.globalAlpha = 1;
+        }
     },
     drawExbDetail:function(info ,i){
         var t = this;
+        var dl = app.drawLib;
         t.exInfoImgs[i].src = 'img/Icons/white/' +info.img;
         var w = t.exCol.w;
         var size = 96;
         var ec = info;
-        t.drawRect(ec.x,ec.y + 30,size,size,info.color);
-        t.drawImage(t.exInfoImgs[i],ec.x + (size *.1),ec.y + (size *.1) + 30,size * .8,size *.8);
-        t.wrapText(info.name,info.w/2 + size,ec.y + 35 + 35, 15,t.textCol.dark,info.w - 90,30);
+        dl.drawRect(t.ctx,ec.x,ec.y + 30,size,size,info.color);
+        dl.drawImage(t.ctx,t.exInfoImgs[i],ec.x + (size *.15),ec.y + (size *.15) + 30,size * .7,size *.7);
+        dl.wrapTextLeft(t.ctx,info.name,180,ec.y + 47, 20,t.textCol.dark,info.w - 120,20);
 
         var newPeps = info.exhibitors.join(' - ');
-        t.wrapText(newPeps, info.w/2 + size,ec.y +size + 40 + 30, 15,t.textCol.mid, info.w, 17);
-        var nh = t.getWrapH(newPeps, info.w/2 + size,ec.y +size + 40 + 30, 15,t.textCol.dark, info.w, 17);
+        dl.wrapText(t.ctx,newPeps, info.w/2 + size,ec.y +size + 40 + 30, 15,t.textCol.mid, info.w, 15);
+        var nh = dl.getWrapH(t.ctx,newPeps, info.w/2 + size,ec.y +size + 40 + 30, 15,t.textCol.dark, info.w, 17);
         //console.log(nh);
-        t.wrapText(info.description,info.w/2 + size,ec.y + size + 40 + 30 + 36 + nh ,20,t.textCol.mid,info.w,15);
-         nh = nh + t.getWrapH(info.description,info.w/2 + size,ec.y + size + 40 + 30 + 36 + nh ,20,t.textCol.mid,info.w,15);
-         nh = nh + 122;
+        dl.wrapText(t.ctx,info.description,info.w/2 + size,ec.y + size + 40 + 30 + 36 + nh ,20,t.textCol.mid,info.w,15);
+        var nh2 = dl.getWrapH(t.ctx,info.description,info.w/2 + size,ec.y + size + 40 + 30 + 36 + nh ,20,t.textCol.mid,info.w,15);
+       
+        nh = nh + nh2;
 
-         t.drawImage(t.distanceImg,115,ec.y + size + 40 + 30 + 36 + nh,30,30);
-         //getDistance
-         t.drawText('~ ' + info.dist +' min',115 + size,ec.y + size + 40 + 30 + 36 + nh + 22, 20, t.textCol.mid, info.w/2);
-         t.drawImage(t.timeImg,115,ec.y + size + 40 + 30 + 36 + nh + 44 + 15,30,30);
-         t.drawText(info.time,115 + size,ec.y + size + 40 + 30 + 36 + nh + 44 + 15 + 22, 20, t.textCol.mid, info.w/2);
-         //get time
-         t.drawImage(t.locationImg,ec.w/2+size ,ec.y + size + 40 + 30 + 36 + nh,30,30);
-         t.drawText(info.location,ec.w/2+size + size, ec.y + size + 40 + 30 + 36 + nh + 22, 20, t.textCol.mid, info.w/2);
-         t.drawImage(t.userImg,ec.w/2 + size,ec.y + size + 40 + 30 + 36 + nh + 44 + 15,30,30);
-        t.drawText(info.ageGroup,ec.w/2+size + size, ec.y + size + 40 + 30 + 36 + nh + 44 + 15 + 22, 20, t.textCol.mid, info.w/2);
+        dl.drawImage(t.ctx,t.distanceImg,115,ec.y + size + 40 + 30 + 36 + nh,30,30);
+        //getDistance
+        dl.drawText(t.ctx,'~ ' + info.dist +' min',115 + size,ec.y + size + 40 + 30 + 36 + nh + 22, 20, t.textCol.mid, info.w/2);
+        dl.drawImage(t.ctx,t.timeImg,115,ec.y + size + 40 + 30 + 36 + nh + 44 + 15,30,30);
+        dl.drawText(t.ctx,info.time,115 + size,ec.y + size + 40 + 30 + 36 + nh + 44 + 15 + 22, 20, t.textCol.mid, info.w/2);
+        //get time
+        dl.drawImage(t.ctx,t.locationImg,ec.w/2+size ,ec.y + size + 40 + 30 + 36 + nh,30,30);
+        dl.wrapText(t.ctx,info.location,ec.w/2+size + size, ec.y + size + 40 + 30 + 36 + nh + 22, 12, t.textCol.mid, info.w/3);
+        dl.drawImage(t.ctx,t.userImg,ec.w/2 + size,ec.y + size + 40 + 30 + 36 + nh + 44 + 15,30,30);
+        dl.drawText(t.ctx,"All",ec.w/2+size + size, ec.y + size + 40 + 30 + 36 + nh + 44 + 15 + 22, 20, t.textCol.mid, info.w/2);
     },
     
     drawZone: function(zone,i,imgArray){
         var t = this;
         var imgpath;
+        var dl = app.drawLib;
         switch(zone.state){
             case 'default':
                 imgpath = 'img/zones/default/';
@@ -1865,1039 +2071,20 @@ app.main = {
                 break;
         }
        imgArray[i].src = imgpath + zone.img +'.png';
-        t.drawImage(imgArray[i],zone.x,zone.y,zone.w,zone.h);
+        dl.drawImage(t.ctx,imgArray[i],zone.x,zone.y,zone.w,zone.h);
     },
-    drawText: function (string, x, y, size, col, maxWidth) {
-        this.ctx.save();
-        this.ctx.font = size + 'px Lato';
-        this.ctx.fillStyle = col;
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText(string, x, y, maxWidth);
-        this.ctx.restore();
-    },
-    wrapText: function(string,x,y,lineHeight,col,maxWidth,size){
-        this.ctx.save();
-       
-        var words = string.split(' ');
-        var line = '';
-        this.ctx.fillStyle = col;
-        this.ctx.textAlign = 'center';
-        this.ctx.font = size + 'px Lato';
-       
-        for(var n = 0; n < words.length; n++){
-          var testLine = line + words[n] + ' ';
-          var metrics = this.ctx.measureText(testLine);
-          var testWidth = metrics.width;
-          if (testWidth > maxWidth && n > 0) {
-            this.ctx.fillText(line, x, y);
-            line = words[n] + ' ';
-            y += lineHeight;
-           
-          }
-          else {
-           // numlines +=1;
-            line = testLine;
-          }
-
-        }
-        
-        this.ctx.fillText(line, x, y);
-      
-      this.ctx.restore();
-    },
-    getWrapH: function(string,x,y,lineHeight,col,maxWidth,size){
-
-                var oy  = y;
-                var words = string.split(' ');
-                var line = '';
-               
-                var numlines = 1;
-                for(var n = 0; n < words.length; n++){
-                  var testLine = line + words[n] + ' ';
-                  var metrics = this.ctx.measureText(testLine);
-                  var testWidth = metrics.width;
-                  if (testWidth > maxWidth && n > 0) {
-                    
-                    line = words[n] + ' ';
-                    y += lineHeight;
-                    numlines +=1;
-                  }
-                  else {
-                   // numlines +=1;
-                    line = testLine;
-                  }
-
-                }
-                
-             var he = size * numlines;
-
-             return he;
-              
-             
-    },
-    drawCircle: function (centerX, centerY, radius, col, alph) {
-
-        this.ctx.save();
-        this.ctx.beginPath();
-        this.ctx.globalAlpha = alph;
-        this.ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
-        this.ctx.fillStyle = col;
-        this.ctx.fill();
-        this.ctx.restore();
-    },
-    drawOutCircle: function (centerX, centerY, radius, col, alph,bc) {
-
-        this.ctx.save();
-        this.ctx.beginPath();
-        this.ctx.globalAlpha = alph;
-        this.ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
-        this.ctx.fillStyle = col;
-        this.ctx.fill();
-        this.ctx.lineWidth = 2;
-        this.ctx.strokeStyle = bc;
-        this.ctx.stroke();
-        this.ctx.restore();
-    },
-    drawCircShadow: function(centerX, centerY, radius, col, alph){
-             this.ctx.save(); // Save the state of the context
-              this.ctx.fillStyle = col; // Sets the fill color
-               this.ctx.globalAlpha = alph;
-              this.ctx.shadowOffsetX = 0; // Sets the shadow offset x, positive number is right
-             this.ctx.shadowOffsetY = 5; // Sets the shadow offset y, positive number is down
-              this.ctx.shadowBlur = 10; // Sets the shadow blur size
-              this.ctx.shadowColor = col; // Sets the shadow color
-              this.ctx.beginPath(); // Starts a shape path
-              this.ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
-             this.ctx.fill(); // Fills the path
-              this.ctx.restore(); // Restore the state of the context
-    },
-
-    drawRect: function (x, y, w, h, col, alph) {
-        this.ctx.save();
-        this.ctx.globalAlpha = alph;
-        this.ctx.fillStyle = col;
-        this.ctx.fillRect(x, y, w, h);
-        this.ctx.restore();
-    },
-    drawOutRect : function( x, y, w, h, col, out)
-    {
-        this.ctx.save();
-        this.ctx.fillStyle = col;
-        this.ctx.strokeStyle = out;
-        this.ctx.lineWidth = 1;
-        this.ctx.fillRect(x,y,w,h);
-        this.ctx.strokeRect(x,y,w,h);
-        this.ctx.restore();
-    },
-    drawImage: function (image, x, y, w, h) {
-
-        this.ctx.save();
-        this.ctx.drawImage(image, x, y, w, h);
-        this.ctx.restore();
-    },
+  
     clearCanvas: function () {
         this.ctx.clearRect(0, 0, this.WIDTH, this.HEIGHT);
     },
-    initTags: function (){
-
-        var t = this;
-        t.tags = [
-            {
-                name: "Art",
-                x:undefined,
-                y:undefined,
-                img:"art.png",
-                selected:false,
-               
-
-            },
-            {
-                name: "Business",
-                x:undefined,
-                y:undefined,
-                img:"business.png",
-                selected:false,
-               
-
-            },
-            {
-                name: "Communication",
-                x:undefined,
-                y:undefined,
-                img:"communication.png",
-                selected:false,
-               
-
-            },
-            {
-                name: "Community",
-                x:undefined,
-                y:undefined,
-                img:"community.png",
-                selected:false,
-               
-            },
-            {
-                name: "Dance",
-                x:undefined,
-                y:undefined,
-                img:"dance.png",
-                selected:false,
-               
-
-            },
-            {
-                name: "Design",
-                x:undefined,
-                y:undefined,
-                img:"design.png",
-                selected:false,
-               
-
-            },
-            {
-                name: "Energy",
-                x:undefined,
-                y:undefined,
-                img:"energy.png",
-                selected:false,
-               
-
-            },
-            {
-                name: "Engineering",
-                x:undefined,
-                y:undefined,
-                img:"engineering.png",
-                selected:false,
-                
-
-            },
-            {
-                name: "Enviorment",
-                x:undefined,
-                y:undefined,
-                img:"environment.png",
-                selected:false,
-               
-
-            },
-            {
-                name: "Gaming",
-                x:undefined,
-                y:undefined,
-                img:"gaming.png",
-                selected:false,
-               
-
-            },
-            {
-                name: "Global",
-                x:undefined,
-                y:undefined,
-                img:"global.png",
-                selected:false,
-               
-
-            },
-            {
-                name: "Health",
-                x:undefined,
-                y:undefined,
-                img:"health.png",
-                selected:false,
-                
-
-            },
-            {
-                name: "Music",
-                x:undefined,
-                y:undefined,
-                img:"music.png",
-                selected:false,
-               
-
-            },
-            {
-                name: "Senior Projects",
-                x:undefined,
-                y:undefined,
-                img:"senior-projects.png",
-                selected:false,
-               
-
-            },
-            {
-                name: "Science",
-                x:undefined,
-                y:undefined,
-                img:"science.png",
-                selected:false,
-               
-            },
-            {
-                name: "Software",
-                x:undefined,
-                y:undefined,
-                img:"software.png",
-                selected:false,
-                
-
-            },
-            {
-                name: "Student Organizations",
-                x:undefined,
-                y:undefined,
-                img:"student-organizations.png",
-                selected:false,
-                
-
-            },
-            {
-                name: "Sustainability",
-                x:undefined,
-                y:undefined,
-                img:"sustainability.png",
-                selected:false,
-               
-
-            },
-            {
-                name: "Technology",
-                x:undefined,
-                y:undefined,
-                img:"technology.png",
-                selected:false,
-               
-
-            },
-            {
-                name: "Photography",
-                x:undefined,
-                y:undefined,
-                img:"photography.png",
-                selected:false,
-               
-
-            },
-            {
-                name: "Math",
-                x:undefined,
-                y:undefined,
-                img:"math.png",
-                selected:false,
-               
-
-            },
-            {
-                name: "Sports",
-                x:undefined,
-                y:undefined,
-                img:"sports.png",
-                selected:false,
-               
-
-            },
-            {
-                name: "Multidisciplinary",
-                x:undefined,
-                y:undefined,
-                img:"multidisciplinary.png",
-                selected:false,
-                
-
-            },
-            {
-                name: "STEM",
-                x:undefined,
-                y:undefined,
-                img:"stem.png",
-                selected:false,
-               
-
-            },
-            {
-                name: "Entrepreneurship",
-                x:undefined,
-                y:undefined,
-                img:"entrepreneurship.png",
-                selected:false,
-               
-
-            },
-
-
-        ];
-    },
-    initZones: function(){
-        //states for zones
-            //default,selected,heatmap1,heatmap2,heatmap3,heatmap4,grey,hightlighted
-       this.zones = [ 
-       {
-            name:"Green Place",
-            x: 324,
-            y: 284,
-            img: 'green-place',
-            state: 'default',
-            w: 261,
-            h: 198,
-            cx:453,
-            cy:377,
-            r:144,
-            cp:{x: 464, y:382 },
-            hmN:0,
-
-        },
-        {
-            name:"Artistic Alley",
-            x: 876,
-            y: 310,
-            img: 'booth',
-            state: 'default',
-            w: 240,
-            h: 135,
-            cx:995,
-            cy:367,
-            r:127,
-            cp:{x: 984, y:357 },
-             hmN:0,
-
-        },
-        {
-            name:"RIT Central",
-            x: 1074,
-            y: 292,
-            img: 'eastman',
-            state: 'default',
-            w: 292,
-            h: 509,
-            cx:1232,
-            cy:438,
-            r:180,
-            cp:{x: 1232, y: 503},
-             hmN:0,
-
-        },
-        {
-            name:"Field House",
-            x: 1352,
-            y: 299,
-            img: 'field-house',
-            state: 'default',
-            w: 387,
-            h: 190,
-             cx:1451,
-            cy:402,
-            r:134,
-            cp:{x: 1496, y:406 },
-             hmN:0,
-
-        },
-         {
-            name:"Engineering Park",
-            x: 710,
-            y: 324,
-            img: 'eng',
-            state: 'default',
-            w: 208,
-            h: 207,
-            cx:815,
-            cy:456,
-            r:129,
-            cp:{x:806 , y:474 },
-             hmN:0,
-
-        },
-        {
-            name:"Global Village",
-            x: 504,
-            y: 555,
-            img: 'gv',
-            state: 'default',
-            w: 194,
-            h: 239,
-            cx:589,
-            cy:675,
-            r:142,
-            cp:{x:556 , y:705 },
-             hmN:0,
-
-        },
-        {
-            name:"Computer Zone",
-            x: 537,
-            y: 396,
-            img: 'gol',
-            state: 'default',
-            w: 168,
-            h: 190,
-            cx:640,
-            cy:490,
-            r:103,
-            cp:{x: 638, y:478 },
-             hmN:0,
-
-        },
-         {
-            name:"Think Tank",
-            x: 919,
-            y: 441,
-            img: 'think',
-            state: 'default',
-            w: 147,
-            h: 90,
-            cx:987,
-            cy:475,
-            r:82,
-            cp:{x:974 , y:468 },
-             hmN:0,
-
-        },
-         {
-            name:"Business District",
-            x: 887,
-            y: 636,
-            img: 'low',
-            state: 'default',
-            w: 123,
-            h: 96,
-            cx:945,
-            cy:685,
-            r:72,
-            cp:{x: 923, y:687 },
-             hmN:0,
-
-        },
-        {
-            name:"Innovation Center",
-            x: 604,
-            y: 564,
-            img: 'mag',
-            state: 'default',
-            w: 99,
-            h: 104,
-            cx:650,
-            cy:616,
-            r:58,
-            cp:{x:660 , y: 623},
-             hmN:0,
-
-        },
-         {
-            name:"Science Center",
-            x: 713,
-            y: 497,
-            img: 'sci',
-            state: 'default',
-            w: 274,
-            h: 198,
-            cx:924,
-            cy:576,
-            r:83,
-            cp:{x: 859, y: 595},
-             hmN:0,
-
-        },
-         {
-            name:"Technology Quarter",
-            x: 587,
-            y: 232,
-            img: 'sus',
-            state: 'default',
-            w: 270,
-            h: 171,
-            cx:785,
-            cy:305,
-            r:85,
-            cp:{x:707 , y:330 },
-             hmN:0,
-
-        },
-         {
-            name:"Info Section",
-            x: 995,
-            y: 498,
-            img: 'wal',
-            state: 'default',
-            w: 130,
-            h: 115,
-            cx:1057,
-            cy:547,
-            r:81,
-            cp:{x:1050 , y:535 },
-             hmN:0,
-
-        },
-
-
-
-        ];
-
-        this.fhColEx = {
-            name:"Field House",
-            cx: 1620,
-            cy: 404,
-            r: 134,
-        }
-        this.centralColEx = {
-            name:"RIT Central",
-            cx: 1227,
-            cy: 700,
-            r: 108,
-        }
-        this.sciColEx = {
-            name:"Science Center",
-            cx: 791,
-            cy: 625,
-            r: 96,
-        }
-        this.techColEx = {
-            name:"Technology Quarter",
-            cx: 650,
-            cy: 362,
-            r: 70,
-        }
-
-    }
 
 };
-
-
-
-var el = document.getElementsByTagName("canvas")[0];
-var mc = new Hammer(el);
-mc.get('pan').set({ direction: Hammer.DIRECTION_ALL });
-mc.get('pinch').set({ enable: true });
-
-
-mc.on("panleft panright panup pandown pinchin pinchout", function (ev) {
-    switch (ev.type) {
-        case "panleft":
-            
-            break;
-        case "panright":
-            
-        case "panup":
-           
-            break;
-        case "pandown":
-            
-            break;
-        case "pinchin":
-           
-            break;
-        case "pinchout":
-            
-            break;
-    }
-});
-function getTapPos(event) {
-
-    var t = app.main;
-
-    var doubleTap = false;
-    var x;
-    var y;
-    event.preventDefault();//prevent window zoom
-    this.userisInZone = false;
-    t.currentZone.shift();
-    var touches = event.changedTouches;
-    x = touches[0].pageX; //get touch x relative to window
-    y = touches[0].pageY; //get touch y relative to window
-   // console.log(x,y);
-    var m = t.matrix;
-    t.curTag = [];
-    //var newX = x * t.matrix[0] + y * t.matrix[2] + (t.matrix[4] * -1);//convert x based on screen pan
-    //var newY = x * t.matrix[1] + y * t.matrix[3] + (t.matrix[5] * -1);//convert y based on screen pan
-    t.ltxs = [x,x];
-    t.ltys = [y,y];
-    // console.log(t.currentInfos);
-
-    t.canScroll = false;
-    t.taps.shift();//shift out fist element in taps array so there are only ever 2
-    t.taps.push({ x: x, y: y });// push new tap x/y to taps array
-    var touchedCircles = [];//touched Circles array to tell if any building colliders were touched
-    var tapsDist = t.getDistanceXY(t.taps[0], t.taps[1]);//get the distance between taps
-    if (tapsDist < 50 && t.tapTimer >= 0) {//check for Double Tap
-        doubleTap = true;//if it is within the distance and withing the time then doubletap = true
-    }
-    if(t.isPointinRect(x,y,t.exCol)){
-        t.canScroll = true;
-
-    }
-
-    for(var p = 0; p < t.prefCols.length; p++){
-       var ta = t.prefCols[p];
-        if(t.isPointinRect(x,y,ta)){
-           
-                t.curTag.shift();
-           if(ta.selected == false){
-               
-                t.curTag.push(ta.name);
-
-            }
-            
-            }
-            else{
-
-            }
-        }
-    for(var k = 0; k < t.tagCols.length; k++){
-       var ta = t.tagCols[k];
-        if(t.isPointinRect(x,y,ta)){
-           
-                t.curTag.shift();
-
-           if(ta.selected == false){
-               
-                t.curTag.push(ta.name);
-
-            }
-            
-            }
-            else{
-
-            }
-        }
-    for(var g = 0; g < t.exCols.length; g++){
-       var ta = t.exCols[g];
-        if(t.isPointinRect(x,y,ta)){
-           
-                t.curTag.shift();
-           if(ta.selected == false){
-               
-                t.curTag.push(ta.name);
-
-            }
-            
-            }
-            else{
-
-            }
-        }
-    for(var w = 0; w < t.currentInfos.length; w++){
-       var ta = t.currentInfos[w];
-        if(t.isPointinRect(x,y,ta)){
-          
-           //if(ta.selected == false){
-               
-           // }
-             if(t.isPointinRect(x,y,ta.forBtn) && t.exState == 'tabs'){
-
-                //console.log('Its a Hit')
-                t.exState = "PDP";
-                 t.curInfo.shift();
-                if(ta.selected == false){
-               
-                    t.curInfo.push(ta.code);
-                    console.log(t.curInfo);
-                }
-           
-            }
-            else{
-
-            }
-        }
-    }
-    if(t.isPointinRect(x,y,t.backBtn)){
-         t.curInfo.shift();
-         t.cINFO = [];
-         t.handleCurrentInfo();
-         t.exState = 'tabs';
-
-       
-
-    }
-    var extras = [t.fhColEx,t.centralColEx,t.sciColEx,t.techColEx];
-    for(var h = 0 ; h < extras.length; h++){
-        var ex = extras[h];
-        if (t.isPointinCircle(x, y, ex) ) {
-                var distance = t.isPointinCircle(x, y, ex);
-               
-                touchedCircles.push({ name: ex.name, dist:distance,});
-            }
-    }
-    
-     for(var q = 0; q < t.zoneBtns.length; q++){
-                var zb = t.zoneBtns[q];
-             if (t.isPointinCircle(x, y, zb) ) { 
-                var distance = t.isPointinCircle(x, y, zb);
-                touchedCircles.push({ name: zb.name, dist:distance,});
-            }
-    }
-
-
-    for (var i = 0; i < t.zones.length; i++) {
-            var zc = t.zones[i];
-            if (t.isPointinCircle(x, y, zc) ) { 
-                var distance = t.isPointinCircle(x, y, zc);                                                                 
-               
-                touchedCircles.push({ name: zc.name, dist:distance,});
-            }
-        }
-    var btns = [t.heatMapBtn,t.visitedBtn,t.recoBtn];
-    
-    for(var f = 0; f < btns.length; f++){
-        var but = btns[f];
-        if(t.isPointinCircle(x,y,but)){
-        var distance = t.isPointinCircle(x, y, but); 
-           /// console.log('heatmap hit');
-
-            touchedCircles.push({ name: but.name, dist:distance,});
-        }
-    }
     
 
-      ///  console.log(touchedCircles);
-    touchedCircles.sort(function (a, b) { return parseFloat(a.dist) - parseFloat(b.dist) });//sort touchedCircls by dist (low-high)
-    //console.log(touchedCircles);
-    if(touchedCircles.length > 0){
-        t.state = 'default';
-        for(var j = 0; j < t.zones.length; j++){
-             
-                if(t.zones[j].name == touchedCircles[0].name  ){
-                        
-                            switch(t.zones[j].state){
-                                case 'default':
-                                    t.currentZone.push(t.zones[j]);
-                                     for(var w = 0; w < t.zoneBtns.length; w++){
-                                        var zb = t.zoneBtns[w];        
-                                        zb.popTimer  = zb.oPop;
-                                    }
-                                      break;
-                                case 'selected':
-                                    t.currentZone.push(t.zones[j]);;
-                                      break;
-                            }
 
-                   
-                           
-                                
-            }
-            else{
-                //t.setZonetoDef();
-            }
-        
-            
-        }
-        for(var w = 0; w < t.zoneBtns.length; w++){
-                var zb = t.zoneBtns[w];
-               if(zb.name == touchedCircles[0].name ){
-                    t.currentZone.push(t.getSelectedZone());      
-                            switch(zb.selected){
-                                case true:
-                                     zb.selected = false;
-                                      break;
-                                case false:
-                                    zb.selected = true;
-                                      break;
-                            }
-              t.handleCurrentInfo();               
-                                
-            }
 
-            else{
-                zb.selected = false;
-            }
-            
-        }
-        if(t.zoneBtns[1].name == touchedCircles[0].name){
-           t.exTags = [];
-            t.exCols =[];
-            console.log(t.searchTags);
-            for(var h = 0; h < t.searchTags.length; h++){
-                var la = t.searchTags[h];
 
-                var pos =  t.searchTags.map(function(e) { return e.name; }).indexOf(la);
-                if(pos > -1){
-                    console.log(pos);
-                    if(la.prefd == true){
-                        t.prefs.push(la);
-                    }
-                        t.searchTags.splice(h,1);
-                    }
-                t.resetTags();
-                t.prefTags = [];
-                t.prefCols =[];
-                t.updateCenterTags();
-                t.updateExTags();
-                t.updateUserPrefTags();
-                    
-            
-            }
-           
-        }
-        if(t.zoneBtns[0].name == touchedCircles[0].name){
-            t.searchTags = [];
-            t.exTags = [];
-            t.exCols =[];
-            for(var e = 0; e < t.currentInfos.length; e++){
-                var ci = t.currentInfos[e];
 
-                    for(var i = 0; i < ci.tags.length; i++){
-                      
-                      var pos = t.searchTags.map(function(e) { return e.name; }).indexOf(ci.tags[i]);
-                      var prefpos = t.prefs.map(function(e) { return e.name; }).indexOf(ci.tags[i]);
-                     // console.log(pos);
-                      //console.log(prefpos);
-                        if(pos <= -1){
-                            if(prefpos >-1){
-                                t.prefs.splice(prefpos,1);
-                                t.searchTags.push({name:ci.tags[i], prefd:true, selected:false});
-                                
-                            }
-                            else{
-                                t.searchTags.push({name:ci.tags[i], prefd:false, selected:false});
-                            }
-                        }
-                    
-
-                    }
-                    //console.log(t.searchTags);
-           
-           }
-            t.resetTags();
-            t.prefTags = [];
-            t.prefCols =[];
-            t.updateCenterTags();
-            t.updateExTags();
-            t.updateUserPrefTags();
-           
-            //t.handleCurrentInfo();
-              
-        }
-        if(t.heatMapBtn.name == touchedCircles[0].name){
-            //console.log('HEAT MAP MODE');
-            t.state = 'heatmap';
-            t.recoBtn.selected = false;
-            t.visitedBtn.selected = false;
-        }
-        if(t.recoBtn.name == touchedCircles[0].name){
-            //console.log('HEAT MAP MODE');
-            //t.state = 'heatmap';
-            switch(t.recoBtn.selected){
-                case true:
-                    t.recoBtn.selected = false;
-                    t.state = 'default';
-                    break;
-                case false:
-                    t.recoBtn.selected = true;
-                    t.visitedBtn.selected = false;
-                    
-                    break;
-            }
-            
-        }
-         if(t.visitedBtn.name == touchedCircles[0].name){
-           switch(t.visitedBtn.selected){
-                case true:
-                    t.visitedBtn.selected = false;
-                    t.state = 'default';
-                    break;
-                case false:
-                    t.visitedBtn.selected = true;
-                    t.recoBtn.selected = false;
-                    t.state = 'visited';
-                    break;
-            }
-        }
-    }
-    //console.log(t.currentZone);
-    t.tapTimer = 30;//reset tap timer
-    //console.log(t.prefs);
-
-}
-function handleDrag(evt){
-    //console.log('draggin');
-     var t = app.main;
-
-     t.dragging = true;
-     var timer = 10;
-    var touches = evt.changedTouches;
-     for (var i=0; i < touches.length; i++) {
-    
-       // var idx = ongoingTouchIndexById(touches[i].identifier);
-       
-        
-          var x  = touches[i].pageX;
-          var y =  touches[i].pageY;
-          t.ltys.shift();
-          t.ltxs.shift();
-          t.ltys.push(y);
-          t.ltxs.push(x);
-    
-    //console.log(t.ltxs);
-    }
-    var xdist = t.ltxs[1] - t.ltxs[0];
-    var ydist = t.ltys[1] - t.ltys[0];
-
-    for(var j = 0; j < t.tagCols.length; j++){
-            var ta = t.tagCols[j];
-            if(ta.selected == true){
-                ta.x += xdist;
-                ta.y += ydist;
-            }
-    }
-    for(var k = 0; k < t.prefCols.length; k++){
-            var ta = t.prefCols[k];
-            if(ta.selected == true){
-                ta.x += xdist;
-                ta.y += ydist;
-            }
-    }
-    for(var g = 0; g < t.exCols.length; g++){
-            var ta = t.exCols[g];
-            if(ta.selected == true){
-                ta.x += xdist;
-                ta.y += ydist;
-            }
-
-    }
-    if(t.canScroll == true){
-        var l = t.currentInfos.length - 1;
-     for(var w = 0; w < t.currentInfos.length; w++){
-            var ta = t.currentInfos[w];
-            //if(ta.selected== true){
-                
-                var prev = w - 1;
-                //ta.x += xdist;
-           
-               t.currentInfos[w].y += ydist;
-                t.currentInfos[w].forBtn.y += ydist;
-        }
-        if(t.currentInfos.length > 0){
-            if(t.exState == 'PDP'){
-                if(t.currentInfos[0].y > t.HEIGHT + 25){
-                    t.handleCurrentInfo();
-                    //t.canScroll =false;
-
-                }
-                if(t.currentInfos[l].y < t.exCol.y - t.exCol.h){
-                    t.handleCurrentInfo();
-                    // t.canScroll = false;
-                }
-            }
-            else{
-
-                if(t.currentInfos[0].y > t.HEIGHT + 25){
-                    t.handleCurrentInfo();
-                    //t.canScroll =false;
-
-                }
-                if(t.currentInfos[l].y < t.exCol.y - 95){
-                    t.handleCurrentInfo();
-                    // t.canScroll = false;
-                }
-            }
-        }
-    }
-    //console.log(xdist);
-}
-function handleTouchEnd(evt){
-     evt.preventDefault();
-     var t =app.main;
-     t.dragging = false;
-}
 window.onload = function () {
 
     //startup();
@@ -2906,12 +2093,25 @@ window.onload = function () {
     
     window.addEventListener("touchmove", handleDrag, false);
     window.addEventListener("touchend", handleTouchEnd, false);
+
    
       app.main.init();
+        t.allUserXYs =[];
+        for(var v = 0; v < 500; v ++){
+                var x = Math.floor(Math.random() * t.WIDTH) + 324;
+                var y = Math.floor(Math.random() * 700) + 284;
+                t.allUserXYs.push({x:x,y:y});
+        }
 
-      setInterval(function(){ t.shuffedArray = t.shuffleArray(t.exInfo); }, 20000);
+      setInterval(function(){ t.shuffedArray = t.shuffleArray(t.exInfo); }, 60000);
        
-     
-
+       setInterval(function(){
+        t.allUserXYs =[];
+        for(var v = 0; v < 500; v ++){
+                var x = Math.floor(Math.random() * t.WIDTH) + 324;
+                var y = Math.floor(Math.random() * 700) + 284;
+                t.allUserXYs.push({x:x,y:y});
+        }
+    }, 60000);
 }
 
